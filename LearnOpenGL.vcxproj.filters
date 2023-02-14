@@ -17,12 +17,12 @@
     <ClCompile Include="E:\Github\LearnOpenGL\ThirdLib\glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
+    <ClCompile Include="Source\Shader\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="Source\Shader\shader.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -30,7 +30,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ShaderSource\vertex_shader.vert" />
-    <None Include="ShaderSource\fragment_shader.frag" />
+    <None Include="Source\ShaderSource\vertex_shader.vert" />
+    <None Include="Source\ShaderSource\fragment_shader.frag" />
   </ItemGroup>
 </Project>

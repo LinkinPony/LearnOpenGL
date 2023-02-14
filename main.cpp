@@ -7,21 +7,22 @@
 #include <string>
 #define STB_IMAGE_IMPLEMENTATION
 #include "ThirdLib/stb_image.h"
-#include "shader.h"
+#include "Source/Shader/shader.h"
 
 float vertices[] = {
-    // 位置              // 颜色
-     0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
-    -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-     0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+    //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // 左下
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // 左上
 };
 
 unsigned int indices[] = {
     // 注意索引从0开始! 
     // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
     // 这样可以由下标代表顶点组合成矩形
-
-    0, 1, 2, // 第一个三角形
+    0, 1, 3, // 第一个三角形
+    1, 2, 3
 };
 //call back function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -56,10 +57,15 @@ GLuint configueVAO() {
     auto VBO = configueVBO();
     //EBO too
     auto EBO = configueEBO();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), reinterpret_cast<void*>(0));
+    //coordinate x,y,z. 3 * 4 bytes
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GL_FLOAT), reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
+    //color r,g,b, 3 * 4 bytes
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
     glEnableVertexAttribArray(1);
+    //texture coordinate x,y, 2 * 4 bytes
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GL_FLOAT), reinterpret_cast<void*>(6 * sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(2);
 
     return VAO;
 }
@@ -83,19 +89,50 @@ int main() {
         return -1;
     }
     GLuint VAO = configueVAO();
-    Shader shader("ShaderSource/vertex_shader.vert", "ShaderSource/fragment_shader.frag");
+    Shader shader("Source/ShaderSource/vertex_shader.vert", "Source/ShaderSource/fragment_shader.frag");
+
+    /* TEXTURE BEGIN */
+    
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("Resource/Texture/container.jpg", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        std::cout << "Texture width x height = " << width << " x " << height << std::endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+    shader.use();
+    shader.setUniformValue<GLint>("texture1", 0);
+    /* TEXTURE END */
+
     while (!glfwWindowShouldClose(window)) {
         //render process
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        //change color by time
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         shader.use();
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
         process_input(window);
         glfwSwapBuffers(window);
-        glfwPollEvents();
+        glfwPollEvents(); 
     }
     glfwTerminate();
 	return 0;

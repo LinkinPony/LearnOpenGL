@@ -151,15 +151,15 @@
   <ItemGroup>
     <ClCompile Include="E:\Github\LearnOpenGL\ThirdLib\glad.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="Source\Shader\shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="shader.h" />
+    <ClInclude Include="Source\Shader\shader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="ShaderSource\fragment_shader.frag" />
-    <None Include="ShaderSource\vertex_shader.vert" />
+    <None Include="Source\ShaderSource\fragment_shader.frag" />
+    <None Include="Source\ShaderSource\vertex_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,7 +5,8 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
-
+#define STB_IMAGE_IMPLEMENTATION
+#include "ThirdLib/stb_image.h"
 #include "shader.h"
 
 float vertices[] = {
@@ -22,29 +23,6 @@ unsigned int indices[] = {
 
     0, 1, 2, // 第一个三角形
 };
-std::string vertex_shader_source = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;  // 位置变量的属性位置值为0
-layout (location = 1) in vec3 aColor;// 颜色变量的属性位置值为 1
-out vec3 vertexColor;
-void main()
-{
-    gl_Position = vec4(aPos, 1.0); // 注意我们如何把一个vec3作为vec4的构造器的参数
-    vertexColor = aColor;
-}
-)";
-
-std::string fragment_shader_source = R"(
-#version 330 core
-in vec3 vertexColor;
-out vec4 FragColor;
-
-
-void main()
-{
-    FragColor = vec4(vertexColor,1.0);
-}
-)";
 //call back function
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -54,33 +32,6 @@ void process_input(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window,true);
     }
-}
-GLuint compileShader(GLenum shader_type,const char * const shader_source) {
-    GLuint shader = glCreateShader(shader_type);
-    glShaderSource(shader, 1, &shader_source, nullptr);
-    glCompileShader(shader);
-    int  success;
-    char infoLog[515];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-    return shader;
-}
-GLuint initShader() {
-    //compile shader
-    GLuint vertex_shader = compileShader(GL_VERTEX_SHADER,vertex_shader_source.c_str());
-    GLuint fragment_shader = compileShader(GL_FRAGMENT_SHADER, fragment_shader_source.c_str());
-    GLuint shader_program = glCreateProgram();
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-    
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-    return shader_program;
 }
 GLuint configueVBO() {
     GLuint VBO;

@@ -6,9 +6,19 @@
 
 
 float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
+    0.5f, 0.5f, 0.0f,   // 右上角
+    0.5f, -0.5f, 0.0f,  // 右下角
+    -0.5f, -0.5f, 0.0f, // 左下角
+    -0.5f, 0.5f, 0.0f   // 左上角
+};
+
+unsigned int indices[] = {
+    // 注意索引从0开始! 
+    // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
+    // 这样可以由下标代表顶点组合成矩形
+
+    0, 1, 3, // 第一个三角形
+    1, 2, 3  // 第二个三角形
 };
 const char* vertex_shader_source = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -52,15 +62,29 @@ GLuint initShader() {
     glDeleteShader(fragment_shader);
     return shader_program;
 }
-GLuint configueVAO() {
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
+GLuint configueVBO() {
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    return VBO;
+}
+GLuint configueEBO() {
+    GLuint EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    return EBO;
+}
+GLuint configueVAO() {
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+   
+    //generate VBO and bind it to current VAO
+    auto VBO = configueVBO();
+    //EBO too
+    auto EBO = configueEBO();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), static_cast<void*>(0));
     glEnableVertexAttribArray(0);
 
@@ -95,7 +119,8 @@ int main() {
         //
         glUseProgram(shader_program);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
         process_input(window);
         glfwSwapBuffers(window);
         glfwPollEvents();

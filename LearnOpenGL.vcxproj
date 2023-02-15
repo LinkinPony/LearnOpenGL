@@ -152,10 +152,12 @@
     <ClCompile Include="E:\Github\LearnOpenGL\ThirdLib\glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Source\Shader\shader.cpp" />
+    <ClCompile Include="Source\Shader\transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Shader\shader.h" />
+    <ClInclude Include="Source\Shader\transform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ShaderSource\fragment_shader.frag" />

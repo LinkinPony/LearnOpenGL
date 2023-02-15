@@ -8,7 +8,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "ThirdLib/stb_image.h"
 #include "Source/Shader/shader.h"
-
+#include "Source/Shader/transform.h"
 float vertices[] = {
     //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // 右上
@@ -92,7 +92,6 @@ int main() {
     Shader shader("Source/ShaderSource/vertex_shader.vert", "Source/ShaderSource/fragment_shader.frag");
 
     /* TEXTURE BEGIN */
-    
     GLuint texture;
     glGenTextures(1, &texture);
     glActiveTexture(GL_TEXTURE0);
@@ -117,6 +116,14 @@ int main() {
     shader.use();
     shader.setUniformValue<GLint>("texture1", 0);
     /* TEXTURE END */
+
+    /*TRANSFORM BEGIN*/
+    auto transform = Transform::rotate_degree(90, glm::vec3(0, 0, 1));
+    transform = transform * Transform::scale(0.5);
+    auto transform_location = glGetUniformLocation(shader.get_ID(), "transform");
+    glUniformMatrix4fv(transform_location, 1, GL_FALSE, glm::value_ptr(transform));
+    /*TRANSFORM END*/
+
 
     while (!glfwWindowShouldClose(window)) {
         //render process

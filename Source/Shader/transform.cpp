@@ -23,6 +23,7 @@ glm::mat4 Transform::translation(const glm::vec3& translate) {
 glm::mat4 Transform::modelTrans(float rotate_degree,
                                 const glm::vec3& rotate_axis, float scale_times,
                                 const glm::vec3& translate) {
-  return rotateByDegree(rotate_degree, rotate_axis) * scale(scale_times) *
-         translation(translate);
+    //do rotate first, then translation.
+  return translation(translate) * scale(scale_times) *
+         rotateByDegree(rotate_degree, rotate_axis);
 }

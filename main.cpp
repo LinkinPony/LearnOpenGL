@@ -1,4 +1,5 @@
 #include <iostream>
+
 // GLAD, include it before GLFW
 #include <glad/glad.h>
 // GLFW
@@ -9,6 +10,7 @@
 #include "Source/Shader/shader.h"
 #include "Source/Shader/transform.h"
 #include "ThirdLib/stb_image.h"
+#include "Source/camera.h"
 
 const int screen_width = 800;
 const int screen_height = 600;
@@ -143,7 +145,10 @@ int main() {
   shader.use();
   shader.setUniformValue<GLint>("texture1", 0);
   /* TEXTURE END */
-
+  auto camera_position = glm::vec3(1.0f);
+  auto target_position = glm::vec3(0,0,0);
+  auto up_direction = glm::vec3(0,1,0);
+  Camera camera(camera_position,target_position,up_direction);
   glEnable(GL_DEPTH_TEST);
   while (!glfwWindowShouldClose(window)) {
     // render process
@@ -154,18 +159,24 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, texture);
 
     /*TRANSFORM BEGIN*/
-    auto identity = glm::mat4(1.0f);
-    auto m_view = glm::translate(identity, glm::vec3(0, 0, -3));
+    float radius = 10.0f;
+    float camX = sin(glfwGetTime()) * radius;
+    float camZ = cos(glfwGetTime()) * radius;
+    camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
+    //auto identity = glm::mat4(1.0f);
+    auto m_view = camera.getLookAtMat();
+    //m_view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0),
+    //                   glm::vec3(0.0, 1.0, 0.0)); 
     auto m_projection = glm::perspective(
         glm::radians(45.0f), static_cast<float>(screen_width) / screen_height,
         0.1f, 100.0f);
     auto setMatrixUniform = [&shader](const glm::mat4& matrix,
-                                      const std::string& matrix_name) -> void {
+                                      const std::string& matrix_name,GLint boolean = GL_FALSE) -> void {
       auto matrix_location =
           glGetUniformLocation(shader.get_ID(), matrix_name.c_str());
-      glUniformMatrix4fv(matrix_location, 1, GL_FALSE, glm::value_ptr(matrix));
+      glUniformMatrix4fv(matrix_location, 1, boolean, glm::value_ptr(matrix));
     };
-    setMatrixUniform(m_view, "m_view");
+    setMatrixUniform(m_view, "m_view",GL_FALSE);
     setMatrixUniform(m_projection, "m_projection");
     /*TRANSFORM END*/
     shader.use();

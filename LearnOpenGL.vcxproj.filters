@@ -14,13 +14,16 @@
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="E:\Github\LearnOpenGL\ThirdLib\glad.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Shader\shader.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Source\Shader\transform.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,6 +35,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Source\Shader\transform.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\camera.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

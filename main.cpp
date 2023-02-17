@@ -57,9 +57,27 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
   return;
 }
-void process_input(GLFWwindow* window) {
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+void process_input(GLFWwindow* window,Camera & camera) {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
+  }
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kForward);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kLeft);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kBack);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kRight);
+  }
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kUp);
+  }
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    camera.moveByDirection(Camera::MoveDirection::kDown);
   }
 }
 GLuint configueVBO() {
@@ -145,10 +163,13 @@ int main() {
   shader.use();
   shader.setUniformValue<GLint>("texture1", 0);
   /* TEXTURE END */
-  auto camera_position = glm::vec3(1.0f);
-  auto target_position = glm::vec3(0,0,0);
+  auto camera_position = glm::vec3(0,0,3);
+  auto camera_direction = glm::vec3(0,0,-1);
   auto up_direction = glm::vec3(0,1,0);
-  Camera camera(camera_position,target_position,up_direction);
+  Camera camera(camera_position,camera_direction,up_direction);
+  camera.set_move_speed(0.05);
+  float last_time = 0;
+  float delta_time = 0;
   glEnable(GL_DEPTH_TEST);
   while (!glfwWindowShouldClose(window)) {
     // render process
@@ -157,12 +178,15 @@ int main() {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-
+    float cur_time = glfwGetTime();
+    delta_time = cur_time - last_time;
+    last_time = cur_time;
+    camera.set_move_speed(delta_time * 5);
     /*TRANSFORM BEGIN*/
     float radius = 10.0f;
     float camX = sin(glfwGetTime()) * radius;
     float camZ = cos(glfwGetTime()) * radius;
-    camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
+    //camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
     //auto identity = glm::mat4(1.0f);
     auto m_view = camera.getLookAtMat();
     //m_view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0),
@@ -183,13 +207,13 @@ int main() {
     glBindVertexArray(VAO);
     for (int i = 0; i < 10; i++) {
       auto m_model =
-          Transform::modelTrans(glfwGetTime() * (i + 1) * 20.0f,
+          Transform::modelTrans((i + 1) * 20.0f,
                                 glm::vec3(1.0, 0.3, 0.5), 1, cubePositions[i]);
       setMatrixUniform(m_model, "m_model");
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     glBindVertexArray(0);
-    process_input(window);
+    process_input(window,camera);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }

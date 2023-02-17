@@ -80,6 +80,36 @@ void process_input(GLFWwindow* window,Camera & camera) {
     camera.moveByDirection(Camera::MoveDirection::kDown);
   }
 }
+//TODO: don't use global var
+float yaw = 0;
+float pitch = 0;
+float fov = 45;
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+  static float last_x = screen_width / 2;
+  std::cout << last_x << std::endl;
+  static float last_y = screen_height / 2;
+  float xoffset = xpos - last_x;
+  float yoffset = last_y - ypos;
+  last_x = xpos;
+  last_y = ypos;
+  float sensitivity = 0.05;
+  xoffset *= sensitivity;
+  yoffset *= sensitivity;
+  yaw += xoffset;
+  pitch += yoffset;
+  //TODO: use const var
+  if (pitch > 89.0f) {
+    pitch = 89;
+  }
+  if (pitch < -89.0f) {
+    pitch = -89;
+  }
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+  if (fov >= 1.0f && fov <= 45.0f) fov -= yoffset;
+  if (fov <= 1.0f) fov = 1.0f;
+  if (fov >= 45.0f) fov = 45.0f;
+}
 GLuint configueVBO() {
   GLuint VBO;
   glGenBuffers(1, &VBO);
@@ -164,13 +194,17 @@ int main() {
   shader.setUniformValue<GLint>("texture1", 0);
   /* TEXTURE END */
   auto camera_position = glm::vec3(0,0,3);
-  auto camera_direction = glm::vec3(0,0,-1);
+  auto camera_direction = glm::vec3(0,0,-10000);
   auto up_direction = glm::vec3(0,1,0);
   Camera camera(camera_position,camera_direction,up_direction);
   camera.set_move_speed(0.05);
   float last_time = 0;
   float delta_time = 0;
   glEnable(GL_DEPTH_TEST);
+  //disable mouse cursor and capture it
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetScrollCallback(window, scroll_callback);
   while (!glfwWindowShouldClose(window)) {
     // render process
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -188,11 +222,12 @@ int main() {
     float camZ = cos(glfwGetTime()) * radius;
     //camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
     //auto identity = glm::mat4(1.0f);
+    camera.moveByEulerianAngles(pitch, yaw);
     auto m_view = camera.getLookAtMat();
     //m_view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0),
     //                   glm::vec3(0.0, 1.0, 0.0)); 
     auto m_projection = glm::perspective(
-        glm::radians(45.0f), static_cast<float>(screen_width) / screen_height,
+        glm::radians(fov), static_cast<float>(screen_width) / screen_height,
         0.1f, 100.0f);
     auto setMatrixUniform = [&shader](const glm::mat4& matrix,
                                       const std::string& matrix_name,GLint boolean = GL_FALSE) -> void {

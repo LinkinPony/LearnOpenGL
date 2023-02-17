@@ -11,8 +11,8 @@ void Camera::updateCameraStatus() {
 Camera::Camera(const glm::vec3& camera_position, const glm::vec3& camera_direction,
                const glm::vec3& up_direction)
     : camera_position_(camera_position),
-      camera_direction_(camera_direction),
-      up_direction_(up_direction) {
+      camera_direction_(glm::normalize(camera_direction)),
+      up_direction_(glm::normalize(up_direction)) {
   updateCameraStatus();
 }
 
@@ -61,4 +61,15 @@ void Camera::moveByDirection(MoveDirection direction) {
       break;
   }
   set_camera_position(cam_pos);
+}
+
+void Camera::moveByEulerianAngles(float pitch_degree, float yaw_degree) {
+  glm::vec3 direction;
+  float pitch_radian = glm::radians(pitch_degree);
+  float yaw_radian = glm::radians(yaw_degree);
+  direction.x = -cos(pitch_radian) * cos(yaw_radian);
+  direction.y = -sin(pitch_radian);
+  direction.z = cos(pitch_radian) * sin(yaw_radian); 
+  direction = glm::normalize(direction);
+  set_camera_direction(direction);
 }

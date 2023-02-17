@@ -25,7 +25,7 @@ class Camera {
                   const glm::vec3 &up_direction);
   glm::mat4 getLookAtMat();
   void moveByDirection(MoveDirection direction);
-
+  void moveByEulerianAngles(float pitch_degree,float yaw_degree);
  public:
   void set_camera_position(const glm::vec3 &camera_position) {
     camera_position_ = camera_position;
@@ -37,6 +37,10 @@ class Camera {
   }
   void set_up_direction(const glm::vec3 &up_direction) {
     up_direction_ = up_direction;
+    updateCameraStatus();
+  }
+  void set_camera_direction(const glm::vec3& camera_direction) {
+    camera_direction_ = camera_direction;
     updateCameraStatus();
   }
   void set_move_speed(float speed) { move_speed_ = speed; }

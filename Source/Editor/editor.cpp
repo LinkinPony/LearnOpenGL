@@ -37,25 +37,40 @@ void Editor::initVertexArrays() {
   // cube VAO
   glGenVertexArrays(1, &cube_VAO_);
   glBindVertexArray(cube_VAO_);
+  //belong to cube_VAO_
+  {
+    glGenBuffers(1, &VBO_);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+    glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(float),
+                 vertices_.data(), GL_STATIC_DRAW);
 
-  glGenBuffers(1, &VBO_);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-  glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(float), vertices_.data(),
-               GL_STATIC_DRAW);
+    glGenBuffers(1, &EBO_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 indices_.size() * sizeof(unsigned int), indices_.data(),
+                 GL_STATIC_DRAW);
 
-  glGenBuffers(1, &EBO_);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(unsigned int),
-               indices_.data(),
-               GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                        reinterpret_cast<void*>(0));
-  glEnableVertexAttribArray(0);
-  // texture coordinate x,y, 2 * 4 bytes
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                        reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
-  glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
+                          reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(0);
+    // texture coordinate x,y, 2 * 4 bytes
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
+                          reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(1);
+  }
   // light VAO
+  glGenVertexArrays(1, &light_VAO_);
+  glBindVertexArray(light_VAO_);
+  //belong to light_VAO_
+  {
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
+                          reinterpret_cast<void*>(0));
+    glEnableVertexAttribArray(0);
+    // texture coordinate x,y, 2 * 4 bytes
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
+                          reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
+    glEnableVertexAttribArray(1);
+  }
 }
 
 void Editor::loadTextures() {
@@ -80,7 +95,7 @@ void Editor::loadTextures() {
   }
   stbi_image_free(data);
   shader_.use();
-  shader_.setUniformValue<GLint>("texture1", 0);
+  shader_.setUniformOneValue<GLint>("texture1", 0);
 }
 
 void Editor::initCamera() {
@@ -89,6 +104,15 @@ void Editor::initCamera() {
   auto up_direction = glm::vec3(0, 1, 0);
   camera_ = Camera(camera_position, camera_direction, up_direction);
   camera_.set_move_speed(0.05);
+}
+
+void Editor::initShader() {
+  shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
+                   "Source/ShaderSource/fragment_shader.frag");
+  light_shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
+                         "Source/ShaderSource/light_shader.frag");
+  shader_.use();
+  shader_.setUniformVec3f("light_color", glm::vec3(1, 0.5, 0.1));
 }
 
 void glmouseCallbackWrapper(GLFWwindow* window, double xpos, double ypos) {
@@ -103,7 +127,14 @@ void glscrollCallbackWrapper(GLFWwindow* window, double xoffset,
 }
 
 Editor::Editor(int screen_width, int screen_height)
-    : screen_height_(screen_height), screen_width_(screen_width) {}
+    : screen_height_(screen_height), screen_width_(screen_width) {
+  EBO_ = 0;
+  VBO_ = 0;
+  cube_VAO_ = 0;
+  light_VAO_ = 0;
+  texture_ = 0;
+  window_ = 0;
+}
 
 int Editor::run() {
   editor = this->shared_from_this();
@@ -111,11 +142,10 @@ int Editor::run() {
   if (exit_code) {
     return exit_code;
   }
-  shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
-                   "Source/ShaderSource/fragment_shader.frag");
   initVertexArrays();
   loadTextures();
   initCamera();
+  initShader();
   float last_time = 0;
   float delta_time = 0;
   glEnable(GL_DEPTH_TEST);
@@ -140,7 +170,7 @@ int Editor::run() {
     float camZ = cos(glfwGetTime()) * radius;
     // camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
     // auto identity = glm::mat4(1.0f);
-    camera_.moveByEulerianAngles();
+    //camera_.moveByEulerianAngles();
     auto m_view = camera_.getLookAtMat();
     //m_view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0),
     //                     glm::vec3(0.0, 1.0, 0.0));

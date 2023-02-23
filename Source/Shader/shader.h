@@ -1,5 +1,8 @@
 #pragma once
 #include <glad/glad.h>
+#include "../../ThirdLib/glm/glm.hpp"
+#include "../../ThirdLib/glm/gtc/matrix_transform.hpp"
+#include "../../ThirdLib/glm/gtc/type_ptr.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -23,15 +26,22 @@ class Shader {
   GLuint get_ID() { return ID_; }
 
   Shader(const std::string& vertex_path, const std::string& fragment_path);
-  Shader() { ID_ = NULL; }
+  Shader() {
+    ID_ = NULL;
+    fragment_shader_ = NULL;
+    vertex_shader_ = NULL;
+    memset(infoLog, 0, sizeof(infoLog));
+  }
   void use();
   template <typename T>
-  void setUniformValue(const std::string& name, const T& value) const;
+  void setUniformOneValue(const std::string& name, const T& value) const;
+  void setUniformVec3f(const std::string& name, const glm::vec3& value) const;
 };
 
 template <typename T>
-inline void Shader::setUniformValue(const std::string& name,
+inline void Shader::setUniformOneValue(const std::string& name,
                                     const T& value) const {
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniform1i(location, value);
+  
 }

@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Editor\editor.cpp" />
     <ClCompile Include="glad.c">
       <DeploymentContent>true</DeploymentContent>
     </ClCompile>
@@ -158,6 +159,7 @@
     <ClCompile Include="Source\Shader\transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Editor\editor.h" />
     <ClInclude Include="Source\camera.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Shader\shader.h" />

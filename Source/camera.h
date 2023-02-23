@@ -12,6 +12,9 @@ class Camera {
   glm::vec3 camera_up_direction_;
 
   float move_speed_;
+  float yaw_ = 0;
+  float pitch_ = 0;
+
 
  private:
   void updateCameraStatus();
@@ -23,9 +26,11 @@ class Camera {
   explicit Camera(const glm::vec3 &camera_position,
                   const glm::vec3 &camera_target,
                   const glm::vec3 &up_direction);
+  Camera() {}
   glm::mat4 getLookAtMat();
   void moveByDirection(MoveDirection direction);
   void moveByEulerianAngles(float pitch_degree,float yaw_degree);
+  void moveByEulerianAngles();
  public:
   void set_camera_position(const glm::vec3 &camera_position) {
     camera_position_ = camera_position;
@@ -53,4 +58,8 @@ class Camera {
   glm::vec3 get_camera_right_direction() { return camera_right_direction_; }
   glm::vec3 get_camera_up_direction() { return camera_up_direction_; }
   float get_move_speed() { return move_speed_; }
+
+
+  float &getref_pitch() { return pitch_; }
+  float &getref_yaw() { return yaw_; }
 };

@@ -10,6 +10,16 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
   return;
 }
+void glmouseCallbackWrapper(GLFWwindow* window, double xpos, double ypos) {
+  if (editor == nullptr) return;
+  editor->mouseCallback(xpos, ypos);
+}
+
+void glscrollCallbackWrapper(GLFWwindow* window, double xoffset,
+                             double yoffset) {
+  if (editor == nullptr) return;
+  editor->scrollCallback(xoffset, yoffset);
+}
 
 int Editor::initEnvironment() {
   glfwInit();
@@ -30,6 +40,11 @@ int Editor::initEnvironment() {
     std::cout << "Failed to initialize GLAD" << std::endl;
     return -1;
   }
+  glEnable(GL_DEPTH_TEST);
+  // disable mouse cursor and capture it
+  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(window_, glmouseCallbackWrapper);
+  glfwSetScrollCallback(window_, glscrollCallbackWrapper);
   return 0;
 }
 
@@ -109,21 +124,10 @@ void Editor::initCamera() {
 void Editor::initShader() {
   shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
                    "Source/ShaderSource/fragment_shader.frag");
-  light_shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
+  light_shader_ = Shader("Source/ShaderSource/light.vert",
                          "Source/ShaderSource/light_shader.frag");
   shader_.use();
-  shader_.setUniformVec3f("light_color", glm::vec3(1, 0.5, 0.1));
-}
-
-void glmouseCallbackWrapper(GLFWwindow* window, double xpos, double ypos) {
-  if (editor == nullptr) return;
-  editor->mouseCallback(xpos, ypos);
-}
-
-void glscrollCallbackWrapper(GLFWwindow* window, double xoffset,
-                             double yoffset) {
-  if (editor == nullptr) return;
-  editor->scrollCallback(xoffset, yoffset);
+  shader_.setUniformVec3f("light_color", glm::vec3(1, 0, 0));
 }
 
 Editor::Editor(int screen_width, int screen_height)
@@ -148,11 +152,6 @@ int Editor::run() {
   initShader();
   float last_time = 0;
   float delta_time = 0;
-  glEnable(GL_DEPTH_TEST);
-  // disable mouse cursor and capture it
-  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(window_, glmouseCallbackWrapper);
-  glfwSetScrollCallback(window_, glscrollCallbackWrapper);
   while (!glfwWindowShouldClose(window_)) {
     // render process
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -165,19 +164,9 @@ int Editor::run() {
     last_time = cur_time;
     camera_.set_move_speed(delta_time * 5);
     /*TRANSFORM BEGIN*/
-    float radius = 10.0f;
-    float camX = sin(glfwGetTime()) * radius;
-    float camZ = cos(glfwGetTime()) * radius;
-    // camera.set_camera_position(glm::vec3(camX, 0.0, camZ));
-    // auto identity = glm::mat4(1.0f);
     //camera_.moveByEulerianAngles();
     auto m_view = camera_.getLookAtMat();
-    //m_view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0),
-    //                     glm::vec3(0.0, 1.0, 0.0));
-    auto m_projection = glm::perspective(
-        glm::radians(fov_), static_cast<float>(screen_width_) / screen_height_,
-        0.1f, 100.0f);
-    m_projection = Transform::projectionTrans(
+    auto m_projection = Transform::projectionTrans(
         fov_, static_cast<float>(screen_width_) / screen_height_, 0.1f, 100.0f);
     auto setMatrixUniform = [](Shader& shader, const glm::mat4& matrix,
                                const std::string& matrix_name,
@@ -186,10 +175,10 @@ int Editor::run() {
           glGetUniformLocation(shader.get_ID(), matrix_name.c_str());
       glUniformMatrix4fv(matrix_location, 1, boolean, glm::value_ptr(matrix));
     };
-    setMatrixUniform(shader_, m_view, "m_view", GL_TRUE);
-    setMatrixUniform(shader_, m_projection, "m_projection", GL_TRUE);
     /*TRANSFORM END*/
     shader_.use();
+    setMatrixUniform(shader_, m_view, "m_view", GL_TRUE);
+    setMatrixUniform(shader_, m_projection, "m_projection", GL_TRUE);
     glBindVertexArray(cube_VAO_);
     for (int i = 0; i < 10; i++) {
       auto m_model = Transform::modelTrans(
@@ -197,6 +186,15 @@ int Editor::run() {
       setMatrixUniform(shader_, m_model, "m_model");
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
+
+    light_shader_.use();
+    glBindVertexArray(light_VAO_);
+    setMatrixUniform(light_shader_, m_view, "m_view", GL_TRUE);
+    setMatrixUniform(light_shader_, m_projection, "m_projection", GL_TRUE);
+    auto m_model =
+        Transform::modelTrans(45, glm::vec3(1, 1, 0), 0.2, light_pos_);
+    setMatrixUniform(light_shader_, m_model, "m_model");
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
     processKeyBoardInput(window_);
     glfwSwapBuffers(window_);

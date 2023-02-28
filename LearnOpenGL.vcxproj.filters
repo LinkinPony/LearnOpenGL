@@ -29,6 +29,9 @@
     <ClCompile Include="Source\Editor\editor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Source\mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Shader\shader.h">
@@ -46,10 +49,14 @@
     <ClInclude Include="Source\Editor\editor.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Source\mesh.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ShaderSource\vertex_shader.vert" />
     <None Include="Source\ShaderSource\fragment_shader.frag" />
     <None Include="Source\ShaderSource\light_shader.frag" />
+    <None Include="Source\ShaderSource\light.vert" />
   </ItemGroup>
 </Project>

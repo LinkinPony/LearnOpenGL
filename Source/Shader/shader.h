@@ -1,13 +1,14 @@
 #pragma once
 #include <glad/glad.h>
-#include "../../ThirdLib/glm/glm.hpp"
-#include "../../ThirdLib/glm/gtc/matrix_transform.hpp"
-#include "../../ThirdLib/glm/gtc/type_ptr.hpp"
 
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include "../../ThirdLib/glm/glm.hpp"
+#include "../../ThirdLib/glm/gtc/matrix_transform.hpp"
+#include "../../ThirdLib/glm/gtc/type_ptr.hpp"
 class Shader {
  private:
   GLuint ID_;
@@ -32,6 +33,7 @@ class Shader {
     vertex_shader_ = NULL;
     memset(infoLog, 0, sizeof(infoLog));
   }
+  ~Shader() { glDeleteProgram(ID_); }
   void use();
   template <typename T>
   void setUniformOneValue(const std::string& name, const T& value) const;
@@ -40,8 +42,7 @@ class Shader {
 
 template <typename T>
 inline void Shader::setUniformOneValue(const std::string& name,
-                                    const T& value) const {
+                                       const T& value) const {
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniform1i(location, value);
-  
 }

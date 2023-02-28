@@ -7,5 +7,7 @@ uniform vec3 light_color;
 
 void main()
 {
-    FragColor = vec4(light_color,1.0) * texture(texture1,TexCoord);
+
+    float ka = 0.3;
+    FragColor = ka * texture(texture1,TexCoord);
 }

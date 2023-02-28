@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\mesh.cpp" />
     <ClCompile Include="Source\Editor\editor.cpp" />
     <ClCompile Include="glad.c">
       <DeploymentContent>true</DeploymentContent>
@@ -159,6 +160,7 @@
     <ClCompile Include="Source\Shader\transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\mesh.h" />
     <ClInclude Include="Source\Editor\editor.h" />
     <ClInclude Include="Source\camera.h" />
     <ClInclude Include="resource.h" />
@@ -167,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Source\ShaderSource\fragment_shader.frag" />
+    <None Include="Source\ShaderSource\light.vert" />
     <None Include="Source\ShaderSource\light_shader.frag" />
     <None Include="Source\ShaderSource\vertex_shader.vert" />
   </ItemGroup>

@@ -12,6 +12,8 @@
 #include "../Shader/transform.h"
 #include "../camera.h"
 
+#include "../mesh.h"
+
 class Editor : public std::enable_shared_from_this<Editor> {
  private:
   int initEnvironment();
@@ -30,6 +32,8 @@ class Editor : public std::enable_shared_from_this<Editor> {
   Shader shader_;
   Shader light_shader_;
   GLFWwindow* window_;
+
+  glm::vec3 light_pos_ = glm::vec3(1.2, 1.0, 1.0);
 
  private:  // temp variables
   std::vector<float> vertices_ = {

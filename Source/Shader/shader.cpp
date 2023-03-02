@@ -25,11 +25,12 @@ GLuint Shader::compileShader(GLenum shader_type,
   int success;
   glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
   if (!success) {
-    glGetShaderInfoLog(shader, 512, NULL, infoLog);
+    char
+        infoLog[BUFF_SIZE];  // store shader compile and program link error info
+    glGetShaderInfoLog(shader, BUFF_SIZE, NULL, infoLog);
     std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
               << infoLog << std::endl;
-  } else
-    std::cout << "complied shader " << shader_source << std::endl;
+  }
   return shader;
 }
 GLuint Shader::createShaderProgram() {
@@ -40,7 +41,8 @@ GLuint Shader::createShaderProgram() {
   GLint success;
   glGetProgramiv(ID_, GL_LINK_STATUS, &success);
   if (!success) {
-    glGetProgramInfoLog(shader_program, 512, NULL, infoLog);
+    char infoLog[BUFF_SIZE];
+    glGetProgramInfoLog(shader_program, BUFF_SIZE, NULL, infoLog);
     std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
               << infoLog << std::endl;
   }
@@ -50,16 +52,16 @@ GLuint Shader::createShaderProgram() {
 }
 Shader::Shader(const std::string& vertex_path,
                const std::string& fragment_path) {
-  vertex_shader_source_ = readFile(vertex_path);
-  fragment_shader_source_ = readFile(fragment_path);
+  std::string vertex_shader_source = readFile(vertex_path);
+  std::string fragment_shader_source = readFile(fragment_path);
   vertex_shader_ =
-      compileShader(GL_VERTEX_SHADER, vertex_shader_source_.c_str());
+      compileShader(GL_VERTEX_SHADER, vertex_shader_source.c_str());
   fragment_shader_ =
-      compileShader(GL_FRAGMENT_SHADER, fragment_shader_source_.c_str());
+      compileShader(GL_FRAGMENT_SHADER, fragment_shader_source.c_str());
   ID_ = createShaderProgram();
 }
-void Shader::use() const { glUseProgram(ID_);
-  std::cout << ID_ << std::endl;
+void Shader::use() const {
+  glUseProgram(ID_);
 }
 
 void Shader::setUniformVec3f(const std::string& name,
@@ -68,8 +70,8 @@ void Shader::setUniformVec3f(const std::string& name,
   glUniform3f(location, value.x, value.y, value.z);
 }
 
-void Shader::setUniformMat4f(const std::string& name,
-                             const glm::mat4& value,GLboolean trans) const {
+void Shader::setUniformMat4f(const std::string& name, const glm::mat4& value,
+                             GLboolean trans) const {
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniformMatrix4fv(location, 1, trans, &value[0][0]);
 }

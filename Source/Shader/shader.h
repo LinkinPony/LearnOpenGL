@@ -12,36 +12,45 @@
 class Shader {
  private:
   GLuint ID_;
-  std::string vertex_shader_source_;
-  std::string fragment_shader_source_;
   GLuint vertex_shader_;
   GLuint fragment_shader_;
 
  private:
   static constexpr int BUFF_SIZE = 512;
-  char infoLog[BUFF_SIZE];  // store shader compile and program link error info
+
   GLuint compileShader(GLenum shader_type, const char* const shader_source);
   GLuint createShaderProgram();
 
  public:
-  
-
   Shader(const std::string& vertex_path, const std::string& fragment_path);
   Shader() {
     ID_ = NULL;
     fragment_shader_ = NULL;
     vertex_shader_ = NULL;
-    memset(infoLog, 0, sizeof(infoLog));
   }
-  //TODO: finish this
-  //we want Shader act like unique_ptr, so we can relese shader program easily.
-  //Shader(const Shader&) = delete;
-  //Shader& operator=(const Shader&) = delete;
-  
-  ~Shader() { 
-      //TODO: delete program and all shader
-      //glDeleteProgram(ID_);
-  
+  // we want Shader act like unique_ptr, so we can relese shader program easily.
+  Shader(const Shader&) = delete;
+  Shader& operator=(const Shader&) = delete;
+  Shader& operator=(Shader&& rhs) noexcept {
+    if (this != &rhs) {
+      ID_ = rhs.ID_;
+      vertex_shader_ = rhs.vertex_shader_;
+      fragment_shader_ = rhs.fragment_shader_;
+      rhs.ID_ = rhs.vertex_shader_ = rhs.fragment_shader_ = 0;
+    }
+    return *this;
+  }
+  Shader(Shader&& rhs) noexcept
+      : ID_(rhs.ID_),
+        vertex_shader_(rhs.vertex_shader_),
+        fragment_shader_(rhs.fragment_shader_) {
+    rhs.ID_ = rhs.vertex_shader_ = rhs.fragment_shader_ = 0;
+  }
+
+  ~Shader() {
+    glDeleteProgram(ID_);
+    glDeleteShader(vertex_shader_);
+    glDeleteShader(fragment_shader_);
   }
 
  public:

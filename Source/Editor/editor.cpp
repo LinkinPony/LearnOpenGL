@@ -106,7 +106,6 @@ int Editor::run() {
     /*TRANSFORM BEGIN*/
     camera_.moveByEulerianAngles();
     auto m_view = camera_.getLookAtMat();
-    debugPrintMat4(m_view);
     auto m_projection = Transform::projectionTrans(
         fov_, static_cast<float>(screen_width_) / screen_height_, 0.1f, 100.0f);
     /*TRANSFORM END*/
@@ -118,7 +117,6 @@ int Editor::run() {
     shader_.setUniformMat4f("m_model", m_model, GL_FALSE);
 
     // draw all models
-    std::cout << "Start draw models" << std::endl;
     for (auto& it : model_) {
       it.draw(shader_);
     }
@@ -158,7 +156,6 @@ void Editor::mouseCallback(double xpos, double ypos) {
   static float last_y = screen_height_ / 2;
   float xoffset = xpos - last_x;
   float yoffset = last_y - ypos;
-  std::cout << xoffset << std::endl;
   last_x = xpos;
   last_y = ypos;
   float sensitivity = 0.05;

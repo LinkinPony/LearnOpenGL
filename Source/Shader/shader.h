@@ -24,7 +24,7 @@ class Shader {
   GLuint createShaderProgram();
 
  public:
-  GLuint get_ID() { return ID_; }
+  
 
   Shader(const std::string& vertex_path, const std::string& fragment_path);
   Shader() {
@@ -33,11 +33,25 @@ class Shader {
     vertex_shader_ = NULL;
     memset(infoLog, 0, sizeof(infoLog));
   }
-  ~Shader() { glDeleteProgram(ID_); }
-  void use();
+  //TODO: finish this
+  //we want Shader act like unique_ptr, so we can relese shader program easily.
+  //Shader(const Shader&) = delete;
+  //Shader& operator=(const Shader&) = delete;
+  
+  ~Shader() { 
+      //TODO: delete program and all shader
+      //glDeleteProgram(ID_);
+  
+  }
+
+ public:
+  GLuint get_ID() { return ID_; }
+  void use() const;
   template <typename T>
   void setUniformOneValue(const std::string& name, const T& value) const;
   void setUniformVec3f(const std::string& name, const glm::vec3& value) const;
+  void setUniformMat4f(const std::string& name, const glm::mat4& value,
+                       GLboolean trans = GL_FALSE) const;
 };
 
 template <typename T>

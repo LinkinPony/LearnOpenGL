@@ -1,5 +1,4 @@
 #include "camera.h"
-
 void Camera::updateCameraStatus() {
   // camera_direction_ = glm::normalize(camera_direction_);
   camera_target_ = camera_position_ + camera_direction_;
@@ -74,4 +73,5 @@ void Camera::moveByEulerianAngles(float pitch_degree, float yaw_degree) {
   set_camera_direction(direction);
 }
 
-void Camera::moveByEulerianAngles() { moveByEulerianAngles(pitch_, yaw_); }
+void Camera::moveByEulerianAngles() { 
+    moveByEulerianAngles(pitch_, yaw_); }

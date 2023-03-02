@@ -15,19 +15,25 @@
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
-  glm::vec3 tex_coord;
+  glm::vec2 tex_coord;
+  Vertex(const glm::vec3 &pos, const glm::vec3 &norm,
+         const glm::vec2 &texture_coord)
+      : position(pos), normal(norm), tex_coord(texture_coord) {}
 };
 struct Texture {
   enum texture_type { kDiffuse, kSpecular };
   //use type2name to get texture's name in shader.
   //kDiffuse = "diffuse", kSpecular = "specular"
   //name rule in shader: type T's i-th texture is
-  //material.type2name[T]_i
+  //texture_type2name[T]_i
   //for example, 3th(numbered from zero) specular texture's name is
-  //material.specular_2
+  //texture_specular_2
   const static std::map<texture_type, std::string> type2name;
   GLuint id;
+  std::string path;
   texture_type type;
+  Texture(GLuint id_in, const std::string &path_in, texture_type type_in)
+      : id(id_in), path(path_in), type(type_in) {}
 };
 class Mesh {
  public:
@@ -35,13 +41,13 @@ class Mesh {
   std::vector<unsigned int> indices_;
   std::vector<Texture> textures_;
 
-  Mesh(const std::vector<Vertex> &vertices,
-       const std::vector<unsigned int> &indices,
-       const std::vector<Texture> &textures);
+  Mesh(const std::vector<Vertex> vertices,
+       const std::vector<unsigned int> indices,
+       const std::vector<Texture> textures);
   ~Mesh();
   // TODO: finish all constructor
 
-  void draw(std::shared_ptr<Shader> shader);
+  void draw(const Shader & shader);
 
  private:
   GLuint VAO_;
@@ -50,5 +56,5 @@ class Mesh {
 
  private:
   void init();
-  void initTexture(std::shared_ptr<Shader> shader);
+  void initTexture(const Shader &shader);
 };

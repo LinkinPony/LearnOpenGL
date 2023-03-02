@@ -1,9 +1,5 @@
 #include "editor.h"
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include "../../ThirdLib/stb_image.h"
-#endif
-
+#include "stb_image.h"
 static std::shared_ptr<Editor> editor;  // for gl function wrapper
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -36,81 +32,17 @@ int Editor::initEnvironment() {
   }
   glfwMakeContextCurrent(window_);
   glfwSetFramebufferSizeCallback(window_, framebufferSizeCallback);
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    std::cout << "Failed to initialize GLAD" << std::endl;
-    return -1;
-  }
-  glEnable(GL_DEPTH_TEST);
   // disable mouse cursor and capture it
   glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window_, glmouseCallbackWrapper);
   glfwSetScrollCallback(window_, glscrollCallbackWrapper);
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    std::cout << "Failed to initialize GLAD" << std::endl;
+    return -1;
+  }
+  stbi_set_flip_vertically_on_load(true);
+  glEnable(GL_DEPTH_TEST);
   return 0;
-}
-
-void Editor::initVertexArrays() {
-  // cube VAO
-  glGenVertexArrays(1, &cube_VAO_);
-  glBindVertexArray(cube_VAO_);
-  //belong to cube_VAO_
-  {
-    glGenBuffers(1, &VBO_);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(float),
-                 vertices_.data(), GL_STATIC_DRAW);
-
-    glGenBuffers(1, &EBO_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 indices_.size() * sizeof(unsigned int), indices_.data(),
-                 GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                          reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(0);
-    // texture coordinate x,y, 2 * 4 bytes
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                          reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(1);
-  }
-  // light VAO
-  glGenVertexArrays(1, &light_VAO_);
-  glBindVertexArray(light_VAO_);
-  //belong to light_VAO_
-  {
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                          reinterpret_cast<void*>(0));
-    glEnableVertexAttribArray(0);
-    // texture coordinate x,y, 2 * 4 bytes
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT),
-                          reinterpret_cast<void*>(3 * sizeof(GL_FLOAT)));
-    glEnableVertexAttribArray(1);
-  }
-}
-
-void Editor::loadTextures() {
-  glGenTextures(1, &texture_);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  int width, height, nrChannels;
-  unsigned char* data = stbi_load("Resource/Texture/container.jpg", &width,
-                                  &height, &nrChannels, 0);
-  if (data) {
-    std::cout << "Texture width x height = " << width << " x " << height
-              << std::endl;
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-  }
-  stbi_image_free(data);
-  shader_.use();
-  shader_.setUniformOneValue<GLint>("texture1", 0);
 }
 
 void Editor::initCamera() {
@@ -124,20 +56,30 @@ void Editor::initCamera() {
 void Editor::initShader() {
   shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
                    "Source/ShaderSource/fragment_shader.frag");
-  light_shader_ = Shader("Source/ShaderSource/light.vert",
-                         "Source/ShaderSource/light_shader.frag");
   shader_.use();
   shader_.setUniformVec3f("light_color", glm::vec3(1, 0, 0));
 }
 
+void Editor::loadModel() {
+  auto model_1 = Model("Resource/Model/rock/rock.obj ");
+  model_.push_back(model_1);
+}
+
 Editor::Editor(int screen_width, int screen_height)
     : screen_height_(screen_height), screen_width_(screen_width) {
-  EBO_ = 0;
-  VBO_ = 0;
-  cube_VAO_ = 0;
-  light_VAO_ = 0;
-  texture_ = 0;
   window_ = 0;
+}
+
+void debugPrintMat4(const glm::mat4& mat) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      std::cout << mat[i][j];
+      if (j == 3)
+        std::cout << std::endl;
+      else
+        std::cout << " ";
+    }
+  }
 }
 
 int Editor::run() {
@@ -146,10 +88,9 @@ int Editor::run() {
   if (exit_code) {
     return exit_code;
   }
-  initVertexArrays();
-  loadTextures();
   initCamera();
   initShader();
+  loadModel();
   float last_time = 0;
   float delta_time = 0;
   while (!glfwWindowShouldClose(window_)) {
@@ -157,46 +98,30 @@ int Editor::run() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture_);
     float cur_time = glfwGetTime();
     delta_time = cur_time - last_time;
     last_time = cur_time;
     camera_.set_move_speed(delta_time * 5);
+    processKeyBoardInput(window_);
     /*TRANSFORM BEGIN*/
-    //camera_.moveByEulerianAngles();
+    camera_.moveByEulerianAngles();
     auto m_view = camera_.getLookAtMat();
+    debugPrintMat4(m_view);
     auto m_projection = Transform::projectionTrans(
         fov_, static_cast<float>(screen_width_) / screen_height_, 0.1f, 100.0f);
-    auto setMatrixUniform = [](Shader& shader, const glm::mat4& matrix,
-                               const std::string& matrix_name,
-                               GLint boolean = GL_FALSE) -> void {
-      auto matrix_location =
-          glGetUniformLocation(shader.get_ID(), matrix_name.c_str());
-      glUniformMatrix4fv(matrix_location, 1, boolean, glm::value_ptr(matrix));
-    };
     /*TRANSFORM END*/
     shader_.use();
-    setMatrixUniform(shader_, m_view, "m_view", GL_TRUE);
-    setMatrixUniform(shader_, m_projection, "m_projection", GL_TRUE);
-    glBindVertexArray(cube_VAO_);
-    for (int i = 0; i < 10; i++) {
-      auto m_model = Transform::modelTrans(
-          (i + 1) * 20.0f, glm::vec3(1.0, 0.3, 0.5), 1, cube_positions_[i]);
-      setMatrixUniform(shader_, m_model, "m_model");
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    shader_.setUniformMat4f("m_view", m_view, GL_TRUE);
+    shader_.setUniformMat4f("m_projection", m_projection, GL_TRUE);
+    auto m_model = Transform::modelTrans(20.0f, glm::vec3(1, 0.3, 0.5), 1,
+                                         glm::vec3(0, 0, 0));
+    shader_.setUniformMat4f("m_model", m_model, GL_FALSE);
 
-    light_shader_.use();
-    glBindVertexArray(light_VAO_);
-    setMatrixUniform(light_shader_, m_view, "m_view", GL_TRUE);
-    setMatrixUniform(light_shader_, m_projection, "m_projection", GL_TRUE);
-    auto m_model =
-        Transform::modelTrans(45, glm::vec3(1, 1, 0), 0.2, light_pos_);
-    setMatrixUniform(light_shader_, m_model, "m_model");
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
-    processKeyBoardInput(window_);
+    // draw all models
+    std::cout << "Start draw models" << std::endl;
+    for (auto& it : model_) {
+      it.draw(shader_);
+    }
     glfwSwapBuffers(window_);
     glfwPollEvents();
   }
@@ -233,6 +158,7 @@ void Editor::mouseCallback(double xpos, double ypos) {
   static float last_y = screen_height_ / 2;
   float xoffset = xpos - last_x;
   float yoffset = last_y - ypos;
+  std::cout << xoffset << std::endl;
   last_x = xpos;
   last_y = ypos;
   float sensitivity = 0.05;

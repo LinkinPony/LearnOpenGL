@@ -28,7 +28,8 @@ GLuint Shader::compileShader(GLenum shader_type,
     glGetShaderInfoLog(shader, 512, NULL, infoLog);
     std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
               << infoLog << std::endl;
-  }
+  } else
+    std::cout << "complied shader " << shader_source << std::endl;
   return shader;
 }
 GLuint Shader::createShaderProgram() {
@@ -57,10 +58,18 @@ Shader::Shader(const std::string& vertex_path,
       compileShader(GL_FRAGMENT_SHADER, fragment_shader_source_.c_str());
   ID_ = createShaderProgram();
 }
-void Shader::use() { glUseProgram(ID_); }
+void Shader::use() const { glUseProgram(ID_);
+  std::cout << ID_ << std::endl;
+}
 
 void Shader::setUniformVec3f(const std::string& name,
                              const glm::vec3& value) const {
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniform3f(location, value.x, value.y, value.z);
+}
+
+void Shader::setUniformMat4f(const std::string& name,
+                             const glm::mat4& value,GLboolean trans) const {
+  GLint location = glGetUniformLocation(ID_, name.c_str());
+  glUniformMatrix4fv(location, 1, trans, &value[0][0]);
 }

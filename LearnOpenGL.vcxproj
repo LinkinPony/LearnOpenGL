@@ -149,6 +149,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\light.cpp" />
     <ClCompile Include="Source\model.cpp" />
     <ClCompile Include="Source\mesh.cpp" />
     <ClCompile Include="Source\Editor\editor.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\light.h" />
     <ClInclude Include="Source\model.h" />
     <ClInclude Include="Source\mesh.h" />
     <ClInclude Include="Source\Editor\editor.h" />

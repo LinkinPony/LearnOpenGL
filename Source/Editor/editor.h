@@ -11,7 +11,7 @@
 #include "../Shader/shader.h"
 #include "../Shader/transform.h"
 #include "../camera.h"
-
+#include "../light.h"
 #include "../model.h"
 
 class Editor : public std::enable_shared_from_this<Editor> {
@@ -31,10 +31,9 @@ class Editor : public std::enable_shared_from_this<Editor> {
   Shader shader_;
   GLFWwindow* window_;
 
-  glm::vec3 light_pos_ = glm::vec3(1.2, 1.0, 1.0);
-
  private:
   std::vector<Model> model_;
+  std::vector<Light> light_;
  public:
   explicit Editor(int screen_width, int screen_height);
   int run();

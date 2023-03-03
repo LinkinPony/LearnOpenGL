@@ -61,8 +61,9 @@ void Editor::initShader() {
 }
 
 void Editor::loadModel() {
-  auto model_1 = Model("Resource/Model/nanosuit/nanosuit.obj ");
-  model_.push_back(model_1);
+  // auto model_1 = Model("Resource/Model/nanosuit/nanosuit.obj ");
+  // model_.push_back(model_1);
+  model_.push_back(Light::getLightModel());
 }
 
 Editor::Editor(int screen_width, int screen_height)

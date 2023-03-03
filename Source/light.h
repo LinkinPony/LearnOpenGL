@@ -3,11 +3,12 @@
 #include "../ThirdLib/glm/gtc/matrix_transform.hpp"
 #include "../ThirdLib/glm/gtc/type_ptr.hpp"
 #include "Shader/shader.h"
+#include "model.h"
 class Light {
  public:
   enum lightType { kPoint, kParallel };
   void bindUniform(const Shader& shader, int index);
-
+  static Model getLightModel();
  private:
   lightType type_;
   float intensity_;

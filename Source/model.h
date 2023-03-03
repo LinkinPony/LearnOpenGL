@@ -8,6 +8,7 @@
 class Model {
  public:
   Model(const std::string& filepath);
+  Model(const std::vector<Mesh>& mesh);
   void draw(const Shader & shader);
  private:
   std::vector<Mesh> mesh_;

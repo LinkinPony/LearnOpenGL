@@ -62,8 +62,10 @@ GLuint Model::loadTextureFromFile(const std::string& path,
 
 Model::Model(const std::string& filepath) { loadModel(filepath); }
 
-void Model::draw(const Shader & shader) {
-  for (auto & it : mesh_) {
+Model::Model(const std::vector<Mesh>& mesh) : mesh_(mesh) {}
+
+void Model::draw(const Shader& shader) {
+  for (auto& it : mesh_) {
     it.draw(shader);
   }
 }
@@ -83,7 +85,6 @@ void Model::loadModel(const std::string& path) {
   if (scene) {
     processNode(scene->mRootNode, scene);
   }
-  
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene) {
@@ -105,7 +106,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
   for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
     glm::vec3 pos(mesh->mVertices[i].x, mesh->mVertices[i].y,
                   mesh->mVertices[i].z);
-    //TODO: change this
+    // TODO: change this
     assert(mesh->HasNormals());
     glm::vec3 norm(mesh->mNormals[i].x, mesh->mNormals[i].y,
                    mesh->mNormals[i].z);
@@ -131,7 +132,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     textures.insert(textures.end(), diffuse_maps.begin(), diffuse_maps.end());
     auto specular_maps = loadMaterialTexture(material, aiTextureType_SPECULAR,
                                              Texture::kSpecular);
-    textures.insert(textures.end(),specular_maps.begin(),specular_maps.end()); 
+    textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
   }
   return Mesh(vertices, indices, textures);
 }

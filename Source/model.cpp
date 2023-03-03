@@ -44,7 +44,7 @@ GLuint Model::loadTextureFromFile(const std::string& path,
         format = GL_RGB;
         break;
     }
-    glBindTexture(GL_TEXTURE, texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format,
                  GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);

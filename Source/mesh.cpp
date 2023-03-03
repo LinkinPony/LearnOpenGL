@@ -17,14 +17,12 @@ Mesh::~Mesh() {
 void Mesh::draw(const Shader &shader) {
   shader.use();
   // init texture
-  //init();
   initTexture(shader);
-  //std::cout << "vertex: " << vertices_.size() << std::endl;
-  //std::cout << "indicies: " << indices_.size() << std::endl;
   //draw
   glBindVertexArray(VAO_);
   glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices_.size()), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+  glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::init() {
@@ -68,8 +66,7 @@ void Mesh::initTexture(const Shader & shader) {
     glActiveTexture(GL_TEXTURE0 + texture_cnt);
     std::string name = "texture_" + type2name.find(it.type)->second + "_";
     name += std::to_string(type_cnt[it.type]++);
-    //std::cout << "set texture [" << name << "]" << std::endl;
     shader.setUniformOneValue<GLuint>(name, texture_cnt);
-    glBindTexture(GL_TEXTURE_2D, textures_[texture_cnt].id);
+    glBindTexture(GL_TEXTURE_2D, it.id);
   }
 }

@@ -63,6 +63,12 @@ void Camera::moveByDirection(MoveDirection direction) {
 }
 
 void Camera::moveByEulerianAngles(float pitch_degree, float yaw_degree) {
+  if (pitch_degree > 89.0f) {
+    pitch_degree = 89.0f;
+  }
+  if (pitch_degree < -89.0f) {
+    pitch_degree = -89.0f;
+  }
   glm::vec3 direction;
   float pitch_radian = glm::radians(pitch_degree);
   float yaw_radian = glm::radians(yaw_degree);
@@ -70,6 +76,7 @@ void Camera::moveByEulerianAngles(float pitch_degree, float yaw_degree) {
   direction.y = -sin(pitch_radian);
   direction.z = cos(pitch_radian) * sin(yaw_radian);
   direction = glm::normalize(direction);
+  updateCameraStatus();
   set_camera_direction(direction);
 }
 

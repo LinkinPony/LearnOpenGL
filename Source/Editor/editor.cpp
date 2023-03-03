@@ -166,12 +166,6 @@ void Editor::mouseCallback(double xpos, double ypos) {
   yaw += xoffset;
   camera_.getref_pitch() += yoffset;
   // TODO: use const var
-  if (pitch > 89.0f) {
-    pitch = 89;
-  }
-  if (pitch < -89.0f) {
-    pitch = -89;
-  }
 }
 
 void Editor::scrollCallback(double xoffset, double yoffset) {

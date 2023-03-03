@@ -65,6 +65,8 @@ Model::Model(const std::string& filepath) { loadModel(filepath); }
 Model::Model(const std::vector<Mesh>& mesh) : mesh_(mesh) {}
 
 void Model::draw(const Shader& shader) {
+  shader.use();
+  shader.setUniformMat4f("m_model", m_model_);
   for (auto& it : mesh_) {
     it.draw(shader);
   }

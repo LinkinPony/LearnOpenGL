@@ -20,6 +20,8 @@ class Editor : public std::enable_shared_from_this<Editor> {
   void initCamera();
   void initShader();
   void loadModel();
+  void loadLight();
+  void configueLight();
   void processKeyBoardInput(GLFWwindow* window);
   void mouseCallback(double xpos, double ypos);
   void scrollCallback(double xoffset, double yoffset);
@@ -29,6 +31,7 @@ class Editor : public std::enable_shared_from_this<Editor> {
   float fov_ = 45;
   Camera camera_;
   Shader shader_;
+  Shader light_shader_;
   GLFWwindow* window_;
 
  private:

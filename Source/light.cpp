@@ -1,7 +1,11 @@
 #include "light.h"
 
 #include <string>
+
+#include "Shader/transform.h"
+
 void Light::bindUniform(const Shader& shader, int index) {
+  shader.use();
   std::string pre = "light[" + std::to_string(index) + "].";
 
   // type
@@ -30,7 +34,7 @@ void Light::bindUniform(const Shader& shader, int index) {
   shader.setUniformVec3f(pre + kAmbientName, ambient_);
 }
 
-Model Light::getLightModel() {
+Model Light::generateLightModel() {
   // create a cube
   std::vector<glm::vec3> pos{glm::vec3(0, 0, 0), glm::vec3(1, 0, 0),
                              glm::vec3(1, 0, 1), glm::vec3(0, 0, 1),
@@ -43,6 +47,29 @@ Model Light::getLightModel() {
   for (auto& it : pos) {
     vertex.emplace_back(it, glm::vec3(0, 1, 0), glm::vec2(0, 0));
   }
-  std::vector<Mesh> mesh{Mesh(vertex, indices, {})};
-  return Model(mesh);
+  return Model(std::vector<Mesh>{Mesh(vertex, indices, {})});
+}
+
+Light::Light(lightType type, float intensity, const glm::vec3& position,
+             const glm::vec3& direction, const glm::vec3& diffuse,
+             const glm::vec3& specular, const glm::vec3& ambient)
+    : type_(type),
+      intensity_(intensity),
+      position_(position),
+      direction_(direction),
+      diffuse_(diffuse),
+      specular_(specular),
+      ambient_(ambient),
+      light_model_(Light::generateLightModel()) {
+  const float extreme_far_coord = 1e9;
+  if (type == kParallel) {
+    position_ = glm::vec3(extreme_far_coord);
+  }
+}
+
+glm::mat4 Light::get_m_model() {
+  float rotate_degree = 0;
+  auto rotate_axis = glm::vec3(0, 1, 0);
+  float scale = 0.2;
+  return Transform::modelTrans(rotate_degree, rotate_axis, scale, position_);
 }

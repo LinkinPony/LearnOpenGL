@@ -66,6 +66,15 @@ class Shader {
 template <typename T>
 inline void Shader::setUniformOneValue(const std::string& name,
                                        const T& value) const {
+  use();
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniform1i(location, value);
+  
+}
+template <>
+inline void Shader::setUniformOneValue(const std::string& name,
+    const float &value) const {
+  use();
+  GLint location = glGetUniformLocation(ID_, name.c_str());
+  glUniform1f(location, value);
 }

@@ -1,4 +1,5 @@
 #include "editor.h"
+
 #include "stb_image.h"
 static std::shared_ptr<Editor> editor;  // for gl function wrapper
 
@@ -56,14 +57,38 @@ void Editor::initCamera() {
 void Editor::initShader() {
   shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
                    "Source/ShaderSource/fragment_shader.frag");
+  light_shader_ = Shader("Source/ShaderSource/vertex_shader.vert",
+                         "Source/ShaderSource/light_shader.frag");
+}
+
+void Editor::loadLight() {
+  float intensity = 100;
+  auto position = glm::vec3(4, 4, 4);
+  auto color = glm::vec3(1, 1, 1);
+  Light light_1(Light::kPoint, intensity, position, glm::vec3(0, 0, 0), color,
+                color, color);
+  light_.push_back(light_1);
+}
+
+void Editor::configueLight() {
   shader_.use();
-  shader_.setUniformVec3f("light_color", glm::vec3(1, 0, 0));
+  shader_.setUniformOneValue<GLint>("light_num",
+                                    static_cast<GLint>(light_.size()));
+  shader_.setUniformVec3f("eye_direction", -camera_.get_camera_direction());
+  for (size_t i = 0; i < light_.size(); i++) {
+    light_shader_.setUniformOneValue<GLint>("index", i);
+    light_[i].bindUniform(shader_, i);
+    light_[i].bindUniform(light_shader_, i);
+    light_[i].get_model().draw(light_shader_);
+  }
 }
 
 void Editor::loadModel() {
-  // auto model_1 = Model("Resource/Model/nanosuit/nanosuit.obj ");
-  // model_.push_back(model_1);
-  model_.push_back(Light::getLightModel());
+  auto m_model = Transform::modelTrans(20.0f, glm::vec3(1, 0.3, 0.5), 1,
+                                       glm::vec3(0, 0, 0));
+  auto model_1 = Model("Resource/Model/nanosuit/nanosuit.obj ");
+  model_1.set_m_model(m_model);
+  model_.push_back(model_1);
 }
 
 Editor::Editor(int screen_width, int screen_height)
@@ -92,6 +117,7 @@ int Editor::run() {
   initCamera();
   initShader();
   loadModel();
+  loadLight();
   float last_time = 0;
   float delta_time = 0;
   while (!glfwWindowShouldClose(window_)) {
@@ -113,10 +139,10 @@ int Editor::run() {
     shader_.use();
     shader_.setUniformMat4f("m_view", m_view, GL_TRUE);
     shader_.setUniformMat4f("m_projection", m_projection, GL_TRUE);
-    auto m_model = Transform::modelTrans(20.0f, glm::vec3(1, 0.3, 0.5), 1,
-                                         glm::vec3(0, 0, 0));
-    shader_.setUniformMat4f("m_model", m_model, GL_FALSE);
-
+    light_shader_.use();
+    light_shader_.setUniformMat4f("m_view", m_view, GL_TRUE);
+    light_shader_.setUniformMat4f("m_projection", m_projection, GL_TRUE);
+    configueLight();
     // draw all models
     for (auto& it : model_) {
       it.draw(shader_);

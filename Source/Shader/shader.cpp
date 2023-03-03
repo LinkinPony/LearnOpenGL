@@ -66,12 +66,14 @@ void Shader::use() const {
 
 void Shader::setUniformVec3f(const std::string& name,
                              const glm::vec3& value) const {
+  use();
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniform3f(location, value.x, value.y, value.z);
 }
 
 void Shader::setUniformMat4f(const std::string& name, const glm::mat4& value,
                              GLboolean trans) const {
+  use();
   GLint location = glGetUniformLocation(ID_, name.c_str());
   glUniformMatrix4fv(location, 1, trans, &value[0][0]);
 }

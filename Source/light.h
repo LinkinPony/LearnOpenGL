@@ -16,11 +16,11 @@ class Light {
  public:
   glm::mat4 get_m_model();
   void set_intensity(float intensity) { intensity_ = intensity; }
-  void set_position(glm::vec3 &position) { position_ = position; }
-  void set_direction(glm::vec3 &direction) { direction_ = direction; }
-  void set_diffuse(glm::vec3 &diffuse_color) { diffuse_ = diffuse_color; }
-  void set_specular(glm::vec3 &specular_color) { specular_ = specular_color; }
-  void set_ambient(glm::vec3 &ambient_color) { ambient_ = ambient_color; }
+  void set_position(const glm::vec3 &position) { position_ = position; }
+  void set_direction(const glm::vec3 &direction) { direction_ = direction; }
+  void set_diffuse(const glm::vec3 &diffuse_color) { diffuse_ = diffuse_color; }
+  void set_specular(const glm::vec3 &specular_color) { specular_ = specular_color; }
+  void set_ambient(const glm::vec3 &ambient_color) { ambient_ = ambient_color; }
 
   Model &get_model() { 
       light_model_.set_m_model(get_m_model());

@@ -4,13 +4,13 @@
 #include "../ThirdLib/glm/gtc/type_ptr.hpp"
 class Camera {
  private:
-  glm::vec3 camera_position_;
+  glm::vec3 camera_position_;//position
   glm::vec3 camera_target_;
-  glm::vec3 camera_direction_;
+  glm::vec3 camera_direction_;//front
   glm::vec3 up_direction_;
   glm::vec3 camera_right_direction_;
   glm::vec3 camera_up_direction_;
-
+  glm::vec3 world_up_direction_;
   float move_speed_;
   float yaw_ = 0;
   float pitch_ = 0;

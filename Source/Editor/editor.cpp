@@ -75,8 +75,10 @@ void Editor::configueLight() {
   shader_.setUniformOneValue<GLint>("light_num",
                                     static_cast<GLint>(light_.size()));
   shader_.setUniformVec3f("eye_direction", -camera_.get_camera_direction());
+  float cur_time = glfwGetTime();
   for (size_t i = 0; i < light_.size(); i++) {
     light_shader_.setUniformOneValue<GLint>("index", i);
+    light_[i].set_diffuse(glm::vec3(sin(cur_time),cos(cur_time),sin(cur_time) * cos(cur_time)));
     light_[i].bindUniform(shader_, i);
     light_[i].bindUniform(light_shader_, i);
     light_[i].get_model().draw(light_shader_);
@@ -84,7 +86,7 @@ void Editor::configueLight() {
 }
 
 void Editor::loadModel() {
-  auto m_model = Transform::modelTrans(20.0f, glm::vec3(1, 0.3, 0.5), 1,
+  auto m_model = Transform::modelTrans(0.0f, glm::vec3(1, 0.3, 0.5), 1,
                                        glm::vec3(0, 0, 0));
   auto model_1 = Model("Resource/Model/nanosuit/nanosuit.obj ");
   model_1.set_m_model(m_model);
@@ -189,9 +191,9 @@ void Editor::mouseCallback(double xpos, double ypos) {
   xoffset *= sensitivity;
   yoffset *= sensitivity;
   float& yaw = camera_.getref_yaw();
-  float pitch = camera_.getref_pitch();
+  float& pitch = camera_.getref_pitch();
   yaw += xoffset;
-  camera_.getref_pitch() += yoffset;
+  pitch += yoffset;
   // TODO: use const var
 }
 
